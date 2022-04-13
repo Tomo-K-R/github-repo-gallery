@@ -4,9 +4,13 @@ const username = "Tomo-K-R";
 // The unordered list to display the repos list
 const reposList = document.querySelector(".repo-list");
 // The section where all your repo information appears. 
-const repos = document.querySelector(".repos");
+const allReposContainer = document.querySelector(".repos");
 // The section where the individual repo data will appear.
 const repoData = document.querySelector(".repo-data");
+// Select the Back to Repo Gallery button
+const backToRepoGalleryButton = document.querySelector(".view-repos");
+// Select the input with the “Search by name” placeholder.
+const filterInput = document.querySelector(".filter-repos");
 
 const getProfile = async function(){
     const res = await fetch(`https://api.github.com/users/${username}`);
@@ -47,12 +51,12 @@ const fetchListOfRepos = async function(){
 
 // A function to display info about the repo.
 const displayRepo = function(repos){
+    // show the filterInput element.
+    filterInput.classList.remove("hide");
     for (const repo of repos){
         const li = document.createElement("li");
         li.classList.add("repo");
-        const nameOfRepo = document.createElement("h3");
-        nameOfRepo.innerHTML = `${repo.name}`;
-        li.append(nameOfRepo);
+        li.innerHTML = `<h3>${repo.name}</h3>`;
         reposList.append(li);
     };
 };
@@ -69,7 +73,7 @@ const getRepoInfo = async function(repoName){
     const repoInfo = await res.json();
     console.log(repoInfo);
 
-    const fetchLanguages = await fetch (`https://api.github.com/repos/Tomo-K-R/github-repo-gallery/languages`);
+    const fetchLanguages = await fetch (repoInfo.languages_url);
     const languageData = await fetchLanguages.json();
     console.log(languageData);
 
@@ -103,5 +107,32 @@ const displayRepoInfo = function(repoInfo, languages){
     // Unhide (show) the “repo-data” element.
     repoData.classList.remove("hide");
     // Hide the element with the class of “repos”.
-    reposList.classList.add("hide");
+    allReposContainer.classList.add("hide");
+     // Unhide the Back to Repo Gallery button.
+    backToRepoGalleryButton.classList.remove("hide");
 };
+
+backToRepoGalleryButton.addEventListener("click", function(){
+    // Unhide (display) the section with the class of “repos”, the location where all the repo information appears.
+    allReposContainer.classList.remove("hide");
+    // Hide the section where the individual repo data will appear. 
+    repoData.classList.add("hide");
+    // Hide the Back to Repo Gallery button itself.
+    backToRepoGalleryButton.classList.add("hide");
+});
+
+// Dynamic search
+filterInput.addEventListener("input", function(e){
+    const search = e.target.value;
+    // console.log(search);
+    const repos = document.querySelectorAll(".repo");
+    // console.log(repos);
+    const searchLowerCase = search.toLowerCase();
+    for (const repo of repos) {
+        const repoLowerCase = repo.innerText.toLowerCase();
+        if (repoLowerCase.includes(searchLowerCase)) {
+            repo.classList.remove("hide") 
+        } else {repo.classList.add("hide")
+        }
+    }
+});
